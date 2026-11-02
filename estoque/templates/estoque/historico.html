@@ -1,0 +1,45 @@
+{% extends 'estoque/base.html' %}
+{% block titulo %}Histórico{% endblock %}
+{% block conteudo %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="m-0">Histórico de movimentações</h4>
+  <form method="get" class="d-flex gap-2">
+    <input type="search" name="q" value="{{ busca }}" class="form-control" placeholder="Produto ou SKU">
+    <select name="tipo" class="form-select">
+      <option value="">Todos</option>
+      <option value="ENTRADA" {{ sel_entrada }}>Entradas</option>
+      <option value="SAIDA" {{ sel_saida }}>Saídas</option>
+    </select>
+    <button class="btn btn-dark">Filtrar</button>
+  </form>
+</div>
+
+<div class="card shadow-sm">
+  <table class="table mb-0">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Produto</th>
+        <th>Tipo</th>
+        <th>Qtd</th>
+        <th>Usuário</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for m in movimentacoes %}
+      <tr>
+        <td>{{ m.data_hora|date:"d/m/Y H:i" }}</td>
+        <td>{{ m.produto.nome }}</td>
+        <td>{{ m.get_tipo_display }}</td>
+        <td>{{ m.quantidade }}</td>
+        <td>{{ m.usuario.username }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="5" class="text-muted text-center">Nenhuma movimentação encontrada.</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

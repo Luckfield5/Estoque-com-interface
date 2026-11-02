@@ -1,0 +1,103 @@
+{% extends 'estoque/base.html' %} {% block conteudo %}
+<h4 class="mb-3">Início</h4>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small">Produtos ativos</div>
+        <div class="fs-3">{{ total_produtos }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small">Valor em estoque</div>
+        <div class="fs-3">R$ {{ valor_estoque|floatformat:2 }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    {% if abaixo_minimo %}
+    <div class="card shadow-sm border-danger">
+      {% else %}
+      <div class="card shadow-sm">
+        {% endif %}
+        <div class="card-body">
+          <div class="text-muted small">Abaixo do mínimo</div>
+          {% if abaixo_minimo %}
+          <div class="fs-3 text-danger">{{ abaixo_minimo.count }}</div>
+          {% else %}
+          <div class="fs-3">0</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if abaixo_minimo %}
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-danger text-white">Estoque baixo</div>
+    <table class="table mb-0">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>SKU</th>
+          <th>Saldo</th>
+          <th>Mínimo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in abaixo_minimo %}
+        <tr>
+          <td>{{ p.nome }}</td>
+          <td>{{ p.sku }}</td>
+          <td class="text-danger fw-bold">{{ p.quantidade }}</td>
+          <td>{{ p.estoque_minimo }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <div class="card shadow-sm">
+    <div class="card-header">Últimas movimentações</div>
+    <table class="table mb-0">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Produto</th>
+          <th>Tipo</th>
+          <th>Qtd</th>
+          <th>Usuário</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in ultimas %}
+        <tr>
+          <td>{{ m.data_hora|date:"d/m/Y H:i" }}</td>
+          <td>{{ m.produto.nome }}</td>
+          <td>
+            {% if m.tipo == 'ENTRADA' %}
+            <span class="badge bg-success">Entrada</span>
+            {% else %}
+            <span class="badge bg-warning text-dark">Saída</span>
+            {% endif %}
+          </td>
+          <td>{{ m.quantidade }}</td>
+          <td>{{ m.usuario.username }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-muted text-center">
+            Nenhuma movimentação ainda.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endblock %}
+</div>

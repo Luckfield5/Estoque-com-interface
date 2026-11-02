@@ -1,0 +1,29 @@
+{% extends 'estoque/base.html' %}
+{% block titulo %}Movimentar estoque{% endblock %}
+{% block conteudo %}
+<h4 class="mb-3">Movimentar estoque</h4>
+<div class="card shadow-sm" style="max-width:520px">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <div class="mb-3">
+        <label class="form-label">Produto</label>
+        {{ form.produto }}
+        {{ form.produto.errors }}
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Tipo</label>
+        {{ form.tipo }}
+        {{ form.tipo.errors }}
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Quantidade</label>
+        {{ form.quantidade }}
+        {{ form.quantidade.errors }}
+      </div>
+      <button class="btn btn-dark">Registrar</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
