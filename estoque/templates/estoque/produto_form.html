@@ -1,0 +1,23 @@
+{% extends 'estoque/base.html' %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block conteudo %}
+<h4 class="mb-3">{{ titulo }}</h4>
+<div class="card shadow-sm" style="max-width:520px">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      {% for campo in form %}
+      <div class="mb-3">
+        <label class="form-label">{{ campo.label }}</label>
+        {{ campo }}
+        <div class="form-text">{{ campo.help_text }}</div>
+        <div class="text-danger small">{{ campo.errors }}</div>
+      </div>
+      {% endfor %}
+      <button class="btn btn-dark">Salvar</button>
+      <a href="{% url 'produtos' %}" class="btn btn-outline-secondary">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

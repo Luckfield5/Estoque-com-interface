@@ -3,10 +3,15 @@
 {% block conteudo %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h4 class="m-0">Produtos</h4>
-  <form method="get" class="d-flex gap-2">
-    <input type="search" name="q" value="{{ busca }}" class="form-control" placeholder="Buscar nome ou SKU">
-    <button class="btn btn-dark">Buscar</button>
-  </form>
+  <div class="d-flex gap-2">
+    <form method="get" class="d-flex gap-2 m-0">
+      <input type="search" name="q" value="{{ busca }}" class="form-control" placeholder="Buscar nome ou SKU">
+      <button class="btn btn-dark">Buscar</button>
+    </form>
+    {% if perms.estoque.add_produto %}
+    <a href="{% url 'produto_novo' %}" class="btn btn-success">Novo produto</a>
+    {% endif %}
+  </div>
 </div>
 
 <div class="card shadow-sm">
@@ -18,6 +23,9 @@
         <th>Preço</th>
         <th>Saldo</th>
         <th>Mínimo</th>
+        {% if perms.estoque.change_produto %}
+        <th class="text-end">Ações</th>
+        {% endif %}
       </tr>
     </thead>
     <tbody>
@@ -28,10 +36,21 @@
         <td>R$ {{ p.preco|floatformat:2 }}</td>
         <td class="fw-bold">{{ p.quantidade }}</td>
         <td>{{ p.estoque_minimo }}</td>
+        {% if perms.estoque.change_produto %}
+        <td class="text-end">
+          <a href="{% url 'produto_editar' p.pk %}" class="btn btn-sm btn-outline-dark">Editar</a>
+          {% if perms.estoque.delete_produto %}
+          <form method="post" action="{% url 'produto_desativar' p.pk %}" class="d-inline" onsubmit="return confirm('Desativar este produto?')">
+            {% csrf_token %}
+            <button class="btn btn-sm btn-outline-danger">Desativar</button>
+          </form>
+          {% endif %}
+        </td>
+        {% endif %}
       </tr>
     {% empty %}
       <tr>
-        <td colspan="5" class="text-muted text-center">Nenhum produto encontrado.</td>
+        <td colspan="6" class="text-muted text-center">Nenhum produto encontrado.</td>
       </tr>
     {% endfor %}
     </tbody>

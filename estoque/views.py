@@ -1,9 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db import transaction
 from django.db.models import DecimalField, ExpressionWrapper, F, Q, Sum
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
-from .forms import MovimentacaoForm
+from .forms import MovimentacaoForm, ProdutoForm, ProdutoNovoForm
 from .models import Movimentacao, Produto
 
 
@@ -34,6 +36,53 @@ def produtos(request):
     if busca:
         lista = lista.filter(Q(nome__icontains=busca) | Q(sku__icontains=busca))
     return render(request, 'estoque/produtos.html', {'produtos': lista, 'busca': busca})
+
+
+@login_required
+@permission_required('estoque.add_produto', raise_exception=True)
+def produto_novo(request):
+    form = ProdutoNovoForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        with transaction.atomic():
+            produto = form.save(commit=False)
+            produto.quantidade = 0
+            produto.save()
+            inicial = form.cleaned_data['quantidade_inicial']
+            if inicial > 0:
+                Movimentacao.objects.create(
+                    produto=produto,
+                    usuario=request.user,
+                    tipo=Movimentacao.ENTRADA,
+                    quantidade=inicial,
+                )
+        messages.success(request, 'Produto cadastrado com sucesso.')
+        return redirect('produtos')
+    return render(request, 'estoque/produto_form.html',
+                  {'form': form, 'titulo': 'Novo produto'})
+
+
+@login_required
+@permission_required('estoque.change_produto', raise_exception=True)
+def produto_editar(request, pk):
+    produto = get_object_or_404(Produto, pk=pk, ativo=True)
+    form = ProdutoForm(request.POST or None, instance=produto)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Produto atualizado com sucesso.')
+        return redirect('produtos')
+    return render(request, 'estoque/produto_form.html',
+                  {'form': form, 'titulo': 'Editar produto'})
+
+
+@login_required
+@permission_required('estoque.delete_produto', raise_exception=True)
+@require_POST
+def produto_desativar(request, pk):
+    produto = get_object_or_404(Produto, pk=pk)
+    produto.ativo = False
+    produto.save()
+    messages.success(request, 'Produto desativado. O histórico foi mantido.')
+    return redirect('produtos')
 
 
 @login_required
