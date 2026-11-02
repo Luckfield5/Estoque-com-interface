@@ -2,9 +2,10 @@
 venv/
 .venv/
 
-# Segredos (senha do banco)
+# Segredos (senha do banco, chaves)
 .env
 .env.*
+!.env.example
 
 # Python
 __pycache__/
